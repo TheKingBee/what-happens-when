@@ -300,6 +300,30 @@ the default gateway it can resume its DNS process:
 * If the local/ISP DNS server does not have it, then a recursive search is
   requested and that flows up the list of DNS servers until the SOA is reached,
   and if found an answer is returned.
+* Almost every time, this DNS servers is not resolving the google.com (the only exceptions are
+  for those doing this request from a computer directly in the Google's datacenter, connected
+  to DNS having the google.com SOA record... this is probably not your case), so this DNS will
+  try to find which server is OWNING the google.com domain.
+  *  A list of predefined "root servers" is set in the configuration of this DNS server. Using
+    its own algorithm, it will pick a root server to find the SOA (Start Of Authority) server.
+  * Once the root server is choosen, a request for the TLD is done. In this case, it's "com".
+    So the NS request for "com." is asked to the root server.
+  * A response will generate a list of servers for the "com" TLD, normally X.gtld-servers.net
+    (served by Verisgn)
+  * Another NS request is send to one of the dtld-servers.net for "google.com."
+  * The Verisign's dns server will respond with the 4 google's DNS servers, ns1.google.com
+    to ns4.google.com and will also include "glue records" (IPv4 Addresses) to reach them directly.
+  * The requesting DNS server will use this information to reach the "real" google.com DNS server
+    (the one owning the SOA of the domain) and ask for for a A (or AAAA if IPv6) with
+    "www.google.com." as the request.
+  * The Google DNS server will use the remotely connecting IP address and resolve it through a
+    recent snapshot of the BGP network to identify the source ASN (Autonomous System Number) of
+    the request (the unique number of your ISP)
+  * The ASN is checked agains a database to know which google's datacenter is considered the best
+    one to respond to a request from your ISP
+  * The Google's DNS server return the IP address of the closest datacenter according to the
+    recursive DNS ASN.
+  * The recursive DNS server will return the IP address back to your OS...
 
 DNS Search for SOA
 ------------------
