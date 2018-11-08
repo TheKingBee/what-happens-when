@@ -8,14 +8,14 @@ enter?"
 Except instead of the usual story, we're going to try to answer this question
 in as much detail as possible. No skipping out on anything.
 
-This is a collaborative process, so dig in and try to help out! There are tons
-of details missing, just waiting for you to add them! So send us a pull
-request, please!
+This is a collaborative process, so dig in and try to help out! There's tons of
+details missing, just waiting for you to add them! So send us a pull request,
+please!
 
 This is all licensed under the terms of the `Creative Commons Zero`_ license.
 
-Read this in `简体中文`_ (simplified Chinese) and `한국어`_ (Korean). NOTE: these
-have not been reviewed by the alex/what-happens-when maintainers.
+Read this in `简体中文`_ (simplified Chinese). NOTE: this has not been reviewed
+by the alex/what-happens-when maintainers.
 
 Table of Contents
 ====================
@@ -26,17 +26,18 @@ Table of Contents
 
 The "g" key is pressed
 ----------------------
-The following sections explain the physical keyboard actions
-and the OS interrupts. When you press the key "g" the browser receives the
-event and the auto-complete functions kick in.
+The following section explains all about the physical keyboard
+and the OS interrupts. But, a whole lot happens after that which
+isn't explained. When you just press "g" the browser receives the
+event and the entire auto-complete machinery kicks into high gear.
 Depending on your browser's algorithm and if you are in
 private/incognito mode or not various suggestions will be presented
-to you in the dropbox below the URL bar. Most of these algorithms sort
-and prioritize results based on search history, bookmarks, cookies, and
-popular searches from the internet as a whole. As you are typing
-"google.com" many blocks of code run and the suggestions will be refined
-with each key press. It may even suggest "google.com" before you finish typing
-it.
+to you in the dropbox below the URL bar. Most of these algorithms
+prioritize results based on search history and bookmarks. You are
+going to type "google.com" so none of it matters, but a lot of code
+will run before you get there and the suggestions will be refined
+with each key press. It may even suggest "google.com" before you
+type it.
 
 The "enter" key bottoms out
 ---------------------------
@@ -63,7 +64,7 @@ connection, but historically has been over PS/2 or ADB connections.
   declared by the keyboard), so it gets the keycode value stored on it.
 
 - This value goes to the USB SIE (Serial Interface Engine) to be converted in
-  one or more USB packets that follow the low level USB protocol.
+  one or more USB packets that follows the low level USB protocol.
 
 - Those packets are sent by a differential electrical signal over D+ and D-
   pins (the middle 2) at a maximum speed of 1.5 Mb/s, as an HID
@@ -212,23 +213,16 @@ DNS lookup
   Chrome, go to `chrome://net-internals/#dns <chrome://net-internals/#dns>`_).
 * If not found, the browser calls ``gethostbyname`` library function (varies by
   OS) to do the lookup.
-* ``gethostbyname`` checks if the hostname can be resolved, trying a variety of
-  methods in the order defined by the OS.
-* The first place ``gethostbyname`` usually checks is the ``hosts`` file, the
-  location of which varies by OS.
-* The next location checked is commonly *DNS*. The DNS lookup will open a
-  connnection to the DNS servers defined by the OS, the user, or the network
-  the computer is connected to. Because ``google.com`` was typed with no
-  trailing dot (``google.com.``), the resolver will first try to look up
-  ``google.com``, then try appending a variety of suffixes in a process called
-  *DNS devolution*.
+* ``gethostbyname`` checks if the hostname can be resolved by reference in the
+  local ``hosts`` file (whose location `varies by OS`_) before trying to
+  resolve the hostname through DNS.
+* If ``gethostbyname`` does not have it cached nor can find it in the ``hosts``
+  file then it makes a request to the DNS server configured in the network
+  stack. This is typically the local router or the ISP's caching DNS server.
 * If the DNS server is on the same subnet the network library follows the
   ``ARP process`` below for the DNS server.
 * If the DNS server is on a different subnet, the network library follows
   the ``ARP process`` below for the default gateway IP.
-* Failing this, ``gethostbyname`` may attempt a *NetBIOS* (or WINS) lookup.
-* If all methods have been exhausted, the resolution will fail, which would
-  commonly result in a message along the lines of "host not found".
 
 
 ARP process
@@ -293,7 +287,7 @@ Switch:
     Target MAC: interface:mac:address:here
     Target IP: interface.ip.goes.here
 
-Now that the network library has the MAC address of either our DNS server or
+Now that the network library has the IP address of either our DNS server or
 the default gateway it can resume its DNS process:
 
 * Port 53 is opened to send a UDP request to DNS server (if the response size
@@ -301,6 +295,55 @@ the default gateway it can resume its DNS process:
 * If the local/ISP DNS server does not have it, then a recursive search is
   requested and that flows up the list of DNS servers until the SOA is reached,
   and if found an answer is returned.
+
+DNS Search for SOA
+------------------
+
+The following section expands upon the reference to the search that "flows up
+the list of DNS servers until the SOA is reached".  When a DNS Server stores a
+domain (e.g. caching or propagation), an SOA record is made.  This is some of
+the information in the SOA:
+
+* **NS:** The primary name server for the domain
+* **Email:** A domain-name (FQDN) for the party responsible for this zone
+* **TTL:** *Time to Live*, time in seconds the record will be cached in servers
+* **Refresh:** time, in seconds, before the zone will be refreshed
+* **Retry:** time, in seconds, before a failed refresh is retried
+* **Negative Cache:** time, in seconds, an unfound record is cached
+
+In the circumstance that there has been no cached SOA records (no propagation)
+for the requested domain or if the TTL has run its course, the search for the
+appropriate IP address begins.
+
+The first DNS Server searched is the **DNS Resolver**.  For most users, their
+DNS resolver is their ISP (*Internet Service Provider*) or they may have a
+faster or public alternative such as Google DNS (8.8.8.8) or OpenDNS
+(208.67.222.222). Google's `NameBench`_ provides analytics on DNS Servers
+available for your computer to use.
+
+If the resolver has no record of the IP address, 1 of the 13 DNS
+`root servers`_ in the world is queried.  The Root Server responds with the
+`.com` TLD (*Top Level Domain*) servers address.  The TLD servers are queried
+until the primary Name Servers for google.com are found. This Name Server is
+the record stored in the Start of Authority data.  To see some information
+from an SOA record, run this command::
+
+    $ host -t soa google.com
+    google.com has SOA record ns1.google.com. dns-admin.google.com. 164707171
+    900 900 1800 60
+
+Additionally, ``$ whois google.com`` displays the Name Servers for google.com::
+
+    ns1.google.com (216.239.32.10)
+    ns2.google.com (216.239.34.10)
+    ns3.google.com (216.239.36.10)
+    ns4.google.com (216.239.38.10)
+
+The Name Server contains the IP of the virtual or physical server for the
+requested domain's web server and website data.  In the case of google.com,
+the IP for the actual search engine is ``216.58.216.36`` (Aug 9, 2017), which
+should not be confused with ``8.8.8.8``, which is the IP of Google's primary
+public DNS.
 
 Opening of a socket
 -------------------
@@ -340,38 +383,14 @@ Most larger businesses and some newer residential connections will have fiber
 or direct Ethernet connections in which case the data remains digital and
 is passed directly to the next `network node`_ for processing.
 
-Eventually, the packet will reach the router managing the local subnet also
-called gateway. This gateway router can have many VLANs(Virtual LAN) which
-segregates broadcast traffic from different IP subnets. Depending on the IP
-and subnet, incoming data frame will land a physical port where the ethernet
-header (in case of `Ethernet`_ ) will be removed what remains then is a IP
-packet that has the source , destinationip address and ports information.
-Routers maintains a table to route packets from incoming interface to outgoing
-interface, now router reads the IP header of IP packet and does a lookup in
-local routing table (which is build using static routes or using dynamic
-protocols like BGP, OSPF) to find the outgoing interface. Before routing packet
-out of the interface TTL field on IP header is decremented by 1 (used for
-avoiding infinite looping of packets), apart from changing TTL other field
-might also change like if packets are fragmented due to MTU being lower on
-outgoing interface router will send ip packets in chunks and re-write the IP
-headres based on original IP Packet , it also will change checksum fields etc.
-Finaly these packets will again be encapsulated with ethernet frame or whatever
-is the outgoing interface type supports and sent to next `network node`_
-for similar processing.
-
-From there, it will continue to travel to routers in path traversing the
-different autonomous systems (ASN is a unique number assigned to Internet
-service providers to identify themselves in internet and route internet
-traffic. BGP- Border Gateway Protocol is the one that maintains huge routing
-tables in ISP routers and relay the packets to destination) and then finally
-reaching to the destination server where it is handded over to TCP/IP stack on
-server for further processing and delivery to applications.
-Each router along the way extracts the destination address from the IP header
-and routesit to the appropriate next hop. The time to live (TTL) field in the
-IP header is decremented by one for each router that passes. The packet will
-be dropped if the TTL field reaches zero or if the current router has no space
-in its queue/buffers (perhaps due to network congestion) or
-because of erroring links and bad CRC.
+Eventually, the packet will reach the router managing the local subnet. From
+there, it will continue to travel to the autonomous system's (AS) border
+routers, other ASes, and finally to the destination server. Each router along
+the way extracts the destination address from the IP header and routes it to
+the appropriate next hop. The time to live (TTL) field in the IP header is
+decremented by one for each router that passes. The packet will be dropped if
+the TTL field reaches zero or if the current router has no space in its queue
+(perhaps due to network congestion).
 
 This send and receive happens multiple times following the TCP connection flow:
 
@@ -711,6 +730,7 @@ page rendering and painting.
 .. _`network node`: https://en.wikipedia.org/wiki/Computer_network#Network_nodes
 .. _`varies by OS` : https://en.wikipedia.org/wiki/Hosts_%28file%29#Location_in_the_file_system
 .. _`简体中文`: https://github.com/skyline75489/what-happens-when-zh_CN
-.. _`한국어`: https://github.com/SantonyChoi/what-happens-when-KR
 .. _`downgrade attack`: http://en.wikipedia.org/wiki/SSL_stripping
 .. _`OSI Model`: https://en.wikipedia.org/wiki/OSI_model
+.. _`NameBench`: https://code.google.com/archive/p/namebench/
+.. _`root servers`: http://www.root-servers.org/
