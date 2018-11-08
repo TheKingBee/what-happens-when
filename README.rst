@@ -401,7 +401,13 @@ This send and receive happens multiple times following the TCP connection flow:
 
 * Client chooses an initial sequence number (ISN) and sends the packet to the
   server with the SYN bit set to indicate it is setting the ISN
-* Server receives SYN and if it's in an agreeable mood:
+* Server receives SYN
+   * Host firewall checks rules for the source/dest ip and ports.
+   * Firewall might reject the packet, by sending a TCP RST
+   * Firewall might drop the packet, leaving the sender to timeout
+   * Firewall might accept the packet, allowing the handshake to proceed
+   * OS kernel checks to see if a service is listening on the port.
+   * If not, kernel sends TCP RST, If so, "three way handshake" continues
    * Server chooses its own initial sequence number
    * Server sets SYN to indicate it is choosing its ISN
    * Server copies the (client ISN +1) to its ACK field and adds the ACK flag
@@ -452,6 +458,74 @@ TLS handshake
 * The client computer sends a ``ClientHello`` message to the server with its
   Transport Layer Security (TLS) version, list of cipher algorithms and
   compression methods available.
+Summary: Initial handshakes are SYN, SYN/ACK, ACK. Data flows are sent
+bi-directionally, with ACKs for each segment. Tear-down is FIN, FIN/ACK, ACK.
+
+TCP is built on top of other protocols, those at layers 1-3 of the OSI model.
+`Internet Protocol`_ is the standard for layer 3. It specifies addressing
+formats, as well as other routing information. Hosts typically have a
+default/gateway route (0.0.0.0/0 in IPv4, ::/0 in IPv6). This gateway is
+typically auto-configured by `DHCP`_ in home networks.
+
+Routing
+-------
+
+ISPs use `Border Gateway Protocol`_ to share routes with all global
+Internet-connected networks. BGP operates by advertising the shortest path
+through intermediate networks to get to the destination. Individual packets are
+processed by specialized hardware which has pre-computed destinations for each
+IP block.
+
+At each hop along the way, the Time To Live (TTL) is decremented. If the TTL
+reaches 0, the packet will be discarded. This protects against routing loops or
+other errors. Additionally, the packet may be dropped if the network path is
+congested, or if a transmission error causes the built-in checksum to fail.
+
+Switching
+---------
+
+Switching is layer 2 of the OSI model. Switching refers to the process by which
+data moves within the local network, as opposed to the inter-network layer 3.
+
+The typical home network will have either wired `Ethernet`_ or `WiFi`_.
+Alternately, a `Cellular data network`_ may be used. In all cases, the
+switching layer has a dedicated address scheme (`MAC Address`_). In order to
+send the data to the gateway router, the host must have the MAC address of the
+router.
+
+Hosts keep a cache of IP-to-MAC assignments. If the host does not have a cache
+entry, an `Address Resolution Protocol`_ request is made. Essentially, this is
+a broadcast for "who is <router's IP>?".
+
+Once the address is located, the IP packet is encapsulated in the Layer 2
+frame.
+
+Since Layer 2 addresses are only valid for the local network, this step is
+repeated by each router along the way, which has to re-encapsulate the packet
+with a new frame header containing the MAC destination of the next hop.
+
+Physical Layer
+--------------
+
+Finally, layer 1. In all cases the last point at which the packet leaves your
+computer is a digital-to-analog (DAC) converter which fires off electrical 1's
+and 0's on a wire. On the other end of the physical bit transfer is an
+`analog-to-digital converter`_  which converts the electrical bits into logic
+signals to be processed by the next `network node`_ where its from and to
+addresses would be analyzed further.
+
+Typical home networks might have a cable modem, DSL, or some form of wireless
+connectivity. Once the packet reaches the ISP, all further physical connections
+are optical fibre.
+
+TLS handshake
+-------------
+
+Now that the TCP socket is established, the browser application takes over
+again.
+
+* The client computer sends a ``Client hello`` message to the server with it
+  TLS version, list of cipher algorithms and compression methods available.
 
 * The server replies with a ``ServerHello`` message to the client with the
   TLS version, selected cipher, selected compression methods and the server's
@@ -774,3 +848,9 @@ page rendering and painting.
 .. _`OSI Model`: https://en.wikipedia.org/wiki/OSI_model
 .. _`NameBench`: https://code.google.com/archive/p/namebench/
 .. _`root servers`: http://www.root-servers.org/
+.. _`OSI Model`: https://en.wikipedia.org/wiki/OSI_Model
+.. _`DHCP`: https://en.wikipedia.org/wiki/DHCP
+.. _`Border Gateway Protocol`: https://en.wikipedia.org/wiki/Border_Gateway_Protocol
+.. _`MAC Address`: https://en.wikipedia.org/wiki/MAC_Address
+.. _`Internet Protocol`: https://en.wikipedia.org/wiki/Internet_Protocol
+.. _`Address Resolution Protocol`: https://en.wikipedia.org/wiki/Address_Resolution_Protocol
