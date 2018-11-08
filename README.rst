@@ -899,7 +899,7 @@ Here is a list of some of the sources used by this project:
 .. _`Cellular data network`: https://en.wikipedia.org/wiki/Cellular_data_communication_protocol
 .. _`analog-to-digital converter`: https://en.wikipedia.org/wiki/Analog-to-digital_converter
 .. _`network node`: https://en.wikipedia.org/wiki/Computer_network#Network_nodes
-.. _`varies by OS` : https://en.wikipedia.org/wiki/Hosts_%28file%29#Location_in_the_file_system
+.. _`varies by OS`: https://en.wikipedia.org/wiki/Hosts_%28file%29#Location_in_the_file_system
 .. _`简体中文`: https://github.com/skyline75489/what-happens-when-zh_CN
 .. _`downgrade attack`: http://en.wikipedia.org/wiki/SSL_stripping
 .. _`OSI Model`: https://en.wikipedia.org/wiki/OSI_model
@@ -911,3 +911,5 @@ Here is a list of some of the sources used by this project:
 .. _`MAC Address`: https://en.wikipedia.org/wiki/MAC_Address
 .. _`Internet Protocol`: https://en.wikipedia.org/wiki/Internet_Protocol
 .. _`Address Resolution Protocol`: https://en.wikipedia.org/wiki/Address_Resolution_Protocol
+.. _`Using multiple A-records (getaddrinfo vs gethostbyname)`:
+http://webmasters.stackexchange.com/questions/10927/using-multiple-a-records-for-my-domain-do-web-browsers-ever-try-more-than-one
