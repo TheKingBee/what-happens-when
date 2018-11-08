@@ -210,8 +210,8 @@ DNS lookup
 
 * Browser checks if the domain is in its cache. (to see the DNS Cache in
   Chrome, go to `chrome://net-internals/#dns <chrome://net-internals/#dns>`_).
-* If not found, the browser calls ``gethostbyname`` library function (varies by
-  OS) to do the lookup.
+* If not found, calls ``getaddrinfo`` library function to do the lookup (used
+  to be the legacy function ``gethostbyname``, but depends on OS / browser).
 * On a GNU/Linux system, this consults the GNU Name Service Switch to see the
   ordering of its next operations. By default it will consult ``files`` and then
   ``dns``.
@@ -223,10 +223,15 @@ DNS lookup
   stack, such as the ``resolv.conf`` file in a GNU/Linux system.
   The DNS server configured here is typically the local router, the ISP's
   caching DNS server or the 8.8.8.8 public DNS on many open source builds.
-* If the DNS server is on the same subnet the network library follows the
-  ``ARP process`` below for the DNS server.
-* If the DNS server is on a different subnet, the network library follows
-  the ``ARP process`` below for the default gateway IP.
+* If the DNS server is on the same subnet the ARP cache is checked for an ARP
+  entry for the DNS server. If there is no entry in the ARP cache we do the
+  ``ARP process`` (see below) for the DNS server. If there is an entry in the
+  ARP cache, we get the information: DNS.server.ip.address = dns:mac:address
+* If the DNS server is on a different subnet, we check the ARP cache for the
+  default gateway IP. If we do not have an entry in the ARP cache we do the
+  ``ARP process`` (see below) for the default gateway IP. If we have an entry
+  in the ARP cache, we get the information:
+  default.gateway.ip.address = gateway:mac:address
 
 ARP process
 -----------
