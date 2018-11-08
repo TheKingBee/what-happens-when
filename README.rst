@@ -137,7 +137,7 @@ This code looks within the 3rd parameter that was passed to ``SendMessage``
 key.
 
 (On macOS) A ``KeyDown`` NSEvent is sent to the app
---------------------------------------------------
+---------------------------------------------------
 
 The interrupt signal triggers an interrupt event in the IOKit kext keyboard
 driver. The driver translates the signal into a key code which is passed to the
@@ -309,25 +309,15 @@ the default gateway it can resume its DNS process:
   for those doing this request from a computer directly in the Google's datacenter, connected
   to DNS having the google.com SOA record... this is probably not your case), so this DNS will
   try to find which server is OWNING the google.com domain.
-  *  A list of predefined "root servers" is set in the configuration of this DNS server. Using
-    its own algorithm, it will pick a root server to find the SOA (Start Of Authority) server.
-  * Once the root server is choosen, a request for the TLD is done. In this case, it's "com".
-    So the NS request for "com." is asked to the root server.
-  * A response will generate a list of servers for the "com" TLD, normally X.gtld-servers.net
-    (served by Verisgn)
+  *  A list of predefined "root servers" is set in the configuration of this DNS server. Using its own algorithm, it will pick a root server to find the SOA (Start Of Authority) server.
+  * Once the root server is choosen, a request for the TLD is done. In this case, it's "com". So the NS request for "com." is asked to the root server.
+  * A response will generate a list of servers for the "com" TLD, normally X.gtld-servers.net (served by Verisgn)
   * Another NS request is send to one of the dtld-servers.net for "google.com."
-  * The Verisign's dns server will respond with the 4 google's DNS servers, ns1.google.com
-    to ns4.google.com and will also include "glue records" (IPv4 Addresses) to reach them directly.
-  * The requesting DNS server will use this information to reach the "real" google.com DNS server
-    (the one owning the SOA of the domain) and ask for for a A (or AAAA if IPv6) with
-    "www.google.com." as the request.
-  * The Google DNS server will use the remotely connecting IP address and resolve it through a
-    recent snapshot of the BGP network to identify the source ASN (Autonomous System Number) of
-    the request (the unique number of your ISP)
-  * The ASN is checked agains a database to know which google's datacenter is considered the best
-    one to respond to a request from your ISP
-  * The Google's DNS server return the IP address of the closest datacenter according to the
-    recursive DNS ASN.
+  * The Verisign's dns server will respond with the 4 google's DNS servers, ns1.google.com to ns4.google.com and will also include "glue records" (IPv4 Addresses) to reach them directly.
+  * The requesting DNS server will use this information to reach the "real" google.com DNS server (the one owning the SOA of the domain) and ask for for a A (or AAAA if IPv6) with "www.google.com." as the request.
+  * The Google DNS server will use the remotely connecting IP address and resolve it through a recent snapshot of the BGP network to identify the source ASN (Autonomous System Number) of the request (the unique number of your ISP)
+  * The ASN is checked agains a database to know which google's datacenter is considered the best one to respond to a request from your ISP
+  * The Google's DNS server return the IP address of the closest datacenter according to the recursive DNS ASN.
   * The recursive DNS server will return the IP address back to your OS...
 
 DNS Search for SOA
@@ -510,6 +500,7 @@ TLS handshake
 * The client computer sends a ``ClientHello`` message to the server with its
   Transport Layer Security (TLS) version, list of cipher algorithms and
   compression methods available.
+  
 Summary: Initial handshakes are SYN, SYN/ACK, ACK. Data flows are sent
 bi-directionally, with ACKs for each segment. Tear-down is FIN, FIN/ACK, ACK.
 
@@ -820,7 +811,7 @@ CSS interpretation
 ------------------
 
 * Parse CSS files, ``<style>`` tag contents, and ``style`` attribute
-  values using `"CSS lexical and syntax grammar"`_
+  values using "CSS lexical and syntax grammar" (see link in sources below)
 * Each CSS file is parsed into a ``StyleSheet object``, where each object
   contains CSS rules with selectors and objects corresponding CSS grammar.
 * A CSS parser can be top-down or bottom-up when a specific parser generator
@@ -890,26 +881,24 @@ Sources
 
 Here is a list of some of the sources used by this project:
 
-.. _`Creative Commons Zero`: https://creativecommons.org/publicdomain/zero/1.0/
-.. _`"CSS lexical and syntax grammar"`: http://www.w3.org/TR/CSS2/grammar.html
-.. _`Punycode`: https://en.wikipedia.org/wiki/Punycode
-.. _`DNS cache poisoning`: https://en.wikipedia.org/wiki/DNS_spoofing
-.. _`Ethernet`: http://en.wikipedia.org/wiki/IEEE_802.3
-.. _`WiFi`: https://en.wikipedia.org/wiki/IEEE_802.11
-.. _`Cellular data network`: https://en.wikipedia.org/wiki/Cellular_data_communication_protocol
-.. _`analog-to-digital converter`: https://en.wikipedia.org/wiki/Analog-to-digital_converter
-.. _`network node`: https://en.wikipedia.org/wiki/Computer_network#Network_nodes
-.. _`varies by OS`: https://en.wikipedia.org/wiki/Hosts_%28file%29#Location_in_the_file_system
-.. _`简体中文`: https://github.com/skyline75489/what-happens-when-zh_CN
-.. _`downgrade attack`: http://en.wikipedia.org/wiki/SSL_stripping
-.. _`OSI Model`: https://en.wikipedia.org/wiki/OSI_model
-.. _`NameBench`: https://code.google.com/archive/p/namebench/
-.. _`root servers`: http://www.root-servers.org/
-.. _`OSI Model`: https://en.wikipedia.org/wiki/OSI_Model
-.. _`DHCP`: https://en.wikipedia.org/wiki/DHCP
-.. _`Border Gateway Protocol`: https://en.wikipedia.org/wiki/Border_Gateway_Protocol
-.. _`MAC Address`: https://en.wikipedia.org/wiki/MAC_Address
-.. _`Internet Protocol`: https://en.wikipedia.org/wiki/Internet_Protocol
-.. _`Address Resolution Protocol`: https://en.wikipedia.org/wiki/Address_Resolution_Protocol
-.. _`Using multiple A-records (getaddrinfo vs gethostbyname)`:
-http://webmasters.stackexchange.com/questions/10927/using-multiple-a-records-for-my-domain-do-web-browsers-ever-try-more-than-one
+- `Creative Commons Zero <https://creativecommons.org/publicdomain/zero/1.0/>`_
+- `CSS lexical and syntax grammar <http://www.w3.org/TR/CSS2/grammar.html>`_
+- `Punycode <https://en.wikipedia.org/wiki/Punycode>`_
+- `DNS cache poisoning <https://en.wikipedia.org/wiki/DNS_spoofing>`_
+- `Ethernet <http://en.wikipedia.org/wiki/IEEE_802.3>`_
+- `WiFi <https://en.wikipedia.org/wiki/IEEE_802.11>`_
+- `Cellular data network <https://en.wikipedia.org/wiki/Cellular_data_communication_protocol>`_
+- `analog-to-digital converter <https://en.wikipedia.org/wiki/Analog-to-digital_converter>`_
+- `network node <https://en.wikipedia.org/wiki/Computer_network#Network_nodes>`_
+- `varies by OS <https://en.wikipedia.org/wiki/Hosts_%28file%29#Location_in_the_file_system>`_
+- `简体中文 <https://github.com/skyline75489/what-happens-when-zh_CN>`_
+- `downgrade attack <http://en.wikipedia.org/wiki/SSL_stripping>`_
+- `OSI Model <https://en.wikipedia.org/wiki/OSI_model>`_
+- `NameBench <https://code.google.com/archive/p/namebench/>`_
+- `root servers <http://www.root-servers.org/>`_
+- `DHCP <https://en.wikipedia.org/wiki/DHCP>`_
+- `Border Gateway Protocol <https://en.wikipedia.org/wiki/Border_Gateway_Protocol>`_
+- `MAC Address <https://en.wikipedia.org/wiki/MAC_Address>`_
+- `Internet Protocol <https://en.wikipedia.org/wiki/Internet_Protocol>`_
+- `Address Resolution Protocol <https://en.wikipedia.org/wiki/Address_Resolution_Protocol>`_
+- `Using multiple A-records (getaddrinfo vs gethostbyname) <http://webmasters.stackexchange.com/questions/10927/using-multiple-a-records-for-my-domain-do-web-browsers-ever-try-more-than-one>`_
